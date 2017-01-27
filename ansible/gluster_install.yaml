@@ -1,0 +1,18 @@
+---
+- hosts: all
+  remote_user: root
+  tasks:
+    - include: gluster_install_ubuntu.yaml
+      static: yes
+      when: ansible_distribution == "Ubuntu" and (ansible_distribution_version == "14.04" or ansible_distribution_version == "16.04")
+
+
+    - include: gluster_install_centos.yaml
+      static: yes
+      when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
+
+
+
+    - include: gluster_install_debian.yaml
+      static: yes
+      when: ansible_distribution == "Debian" and ansible_distribution_major_version == "8"

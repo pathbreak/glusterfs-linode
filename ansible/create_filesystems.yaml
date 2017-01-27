@@ -1,0 +1,20 @@
+---
+- hosts: all
+  remote_user: root
+  tasks:
+
+    - name: Create file systems with optimized options for Gluster
+      filesystem: 
+        fstype: {{ item.fs }} 
+        dev: {{ item.device }} 
+        opts: >-
+          {% if item.fs == 'xfs' %}
+          -i size=512
+          {% elif item.fs == 'ext4' %}
+          -I 512
+          {% endif %}
+      with_items: "{{ filesystems }}"
+    
+    
+    
+

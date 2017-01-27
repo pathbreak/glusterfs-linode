@@ -1,0 +1,23 @@
+- name: Add Debian GlusterFS repo key
+  apt_key:
+    url: 'https://download.gluster.org/pub/gluster/glusterfs/3.8/LATEST/rsa.pub'
+    state: present
+
+
+- name: Add Debian GlusterFS repo
+  command: echo 'deb https://download.gluster.org/pub/gluster/glusterfs/3.8/LATEST/Debian/8/apt jessie main' > /etc/apt/sources.list.d/gluster.list
+    
+    
+- name: Install Debian GlusterFS server
+  apt:
+    name: glusterfs-server
+    state: latest
+    update_cache: yes
+    
+    
+    
+- name: Install Debian GlusterFS client
+  apt:
+    name: glusterfs-client
+    state: latest
+

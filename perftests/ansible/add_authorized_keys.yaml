@@ -1,0 +1,8 @@
+# Playbook to add entries to .ssh/authorized_keys file.
+- hosts: all
+  tasks:
+    - name: Add entries to authorized_keys
+      blockinfile:
+        dest: /root/.ssh/authorized_keys
+        content: |
+          {{ keys }}

@@ -1,0 +1,13 @@
+- name: Install CentOS Storage SIG repo
+  yum:
+    name: centos-release-gluster
+    state: latest
+
+- name: Install CentOS GlusterFS server and clients
+  yum:
+    name: glusterfs-server
+    state: latest
+    
+- name: Enable CentOS Gluster service
+  systemd: name=glusterd enabled=yes 
+

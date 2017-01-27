@@ -1,0 +1,37 @@
+- name: Add Ubuntu GlusterFS repo
+  apt_repository:
+    repo: 'ppa:gluster/glusterfs-3.8'
+    state: present
+    update_cache: yes
+    
+    
+    
+- name: Install Ubuntu GlusterFS server
+  apt:
+    name: glusterfs-server
+    state: latest
+    
+    
+    
+- name: Install Ubuntu GlusterFS client
+  apt:
+    name: glusterfs-client
+    state: latest
+    
+
+
+- name: Install filesystem and imaging utilities
+  apt: name={{ item }} state=latest
+  with_items:
+    - xfsprogs
+    - btrfs-tools
+    - partclone
+
+
+- name: Install firewall capabilities
+  apt: name={{ item }} state=latest
+  with_items:
+    - iptables
+    - ipset
+    - iptables-persistent
+

@@ -1,0 +1,90 @@
+# Playbook to provision a Gluster servers for performance testing.
+# Ubuntu-only.
+#
+# Expected input variables
+#   pubkey_dir : Local directory where target's public key file should be downloaded and stored.
+#
+
+- hosts: all
+  tasks:
+    - name: Copy secure SSH config
+      copy:
+        src: sshd_config.j2
+        dest: /etc/ssh/sshd_config
+        owner: root
+        group: root
+        mode: "u=rw,g=r,o=r"
+        
+    - name: Restart SSH
+      service:
+        name: ssh
+        state: restarted
+  
+    - name: Generate SSH key
+      shell: ssh-keygen -b 4096 -t rsa -f /root/.ssh/id_rsa -q -N ""
+      args:
+        creates: /root/.ssh/id_rsa
+        
+    - name: Fetch SSH public key
+      fetch: 
+        src: /root/.ssh/id_rsa.pub
+        dest: "{{ pubkey_dir }}"
+        flat: yes
+        
+    - name: Add Ubuntu GlusterFS repo
+      apt_repository:
+        repo: 'ppa:gluster/glusterfs-3.8'
+        state: present
+        update_cache: yes
+
+    # Install glusterfs server, client and testing tools
+    - name: Install client side Gluster and testing repo packages
+      apt: name={{ item }} state=latest
+      with_items:
+        - glusterfs-server
+        - glusterfs-client
+        - xfsprogs
+        - iozone3
+        - fio
+        - git
+        - tmux
+        - ioping
+        - iperf
+        - iptables
+        - ipset
+        - iptables-persistent
+        
+    # Create XFS filesystem on the brick device /dev/sdc
+    - name: Create XFS file system with optimized options for Gluster
+      filesystem: 
+        fstype: xfs
+        dev: /dev/sdc
+        opts: '-i size=512'
+
+    # Mount the brick device at well known mount point.
+    - name: Mount brick device
+      mount:
+        name: /data/gluster
+        src: /dev/sdc
+        fstype: xfs
+        opts: noatime
+        state: mounted
+        
+    # Create a brick subdirectory on the brick device, since Gluster
+    # recommends giving a subdirectory as the brick path.
+    - name: Create brick directory
+      file:
+        path: /data/gluster/brick
+        state: directory
+
+    # Enable client side gluster profiling on volume using https://github.com/bengland2/gluster-profile-analysis
+
+    # Install testing scripts
+    - name: Upload iozone_tests.sh
+      copy:
+        src: ../iozone_tests.sh
+        dest: /root/iozone_tests.sh
+        owner: root
+        group: root
+        mode: "u=rwx,g=rx,o=rx"
+      

@@ -1,0 +1,16 @@
+---
+- hosts: all
+  remote_user: root
+  tasks:
+
+    - name: Mount bricks at specified mount points.
+      mount:
+        name: "{{ item.mount }}"
+        src: "{{ item.device }}"
+        fstype: "{{ item.fs }}"
+        opts: noatime
+        state: mounted  
+      with_items: "{{ mounts }}"
+    
+    
+
